@@ -1,8 +1,8 @@
-require "genAlg/version"
-require "genAlg/algorithm"
-require "genAlg/population"
-require "genAlg/chromosome"
+require_relative 'genAlg/version'
+require_relative 'genAlg/algorithm'
+require_relative 'genAlg/population'
+require_relative 'genAlg/chromosome'
 
 module GenAlg
-  # Your code goes here...
+  #module methods goes here
 end
