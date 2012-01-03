@@ -1,49 +1,72 @@
-module GenAlg
-  class Population
-    attr_accessor :age
+class GenAlg::Population
+  attr_accessor :age
 
-    def initialize(params)
-      @age = 0
-      @chromosomes = params[:chromosomes]
-    end
+  def initialize(params)
+    @age = 0
+    @chromosomes = params[:chromosomes]
+    @algorithm_params = params[:algorithm_params]
+  end
 
-    # Mutation method
-    # Parameters: 
-    #  mutation percentage - percentage of chromosomes in population to change
-    def mutation!(params)
-      mutation_percent = params[:percentage]
-      mutation_method = params[:method]
-      (@chromosomes.size * mutation_percent).to_i.times do
-        @chromosomes << mutation_method.call(@chromosomes[rand(@chromosomes.size)])
-      end				
-    end
+  def add_chromosome(chromosome)
+    @chromosomes << chromosome
+  end
 
-    def crossover!(params)
-      crossover_percent = params[:percentage]
-      crossover_method = params[:method]
-      (@chromosomes.size * crossover_percent).to_i.times do
-        crossover_method.call(@chromosomes[rand(@chromosomes.size)], @chromosomes[rand(@chromosomes.size)]).each {|chromo| @chromosomes << chromo}
-      end
-    end
+  def add_chromosomes(chromosomes)
+    chromosomes.each {|chromosome| add_chromosome(chromosome)}
+  end
 
-    def selection!(params)
-      fitness_method = params[:method]
-      max_chromosomes = params[:pop_size]
-      @chromosomes.sort! {|a, b| b.fitness(fitness_method) <=> a.fitness(fitness_method)}
-      @chromosomes.slice!(max_chromosomes..@chromosomes.size) if @chromosomes.size > max_chromosomes
-    end
+  def mutation!
+    (size * mutation_rate).to_i.times do
+      add_chromosome(random_chromosome.mutate)
+    end				
+  end
 
-    def best_fit(params)
-      fitness_method = params[:method]
-      @chromosomes.max {|a, b| b.fitness(fitness_method) <=> a.fitness(fitness_method)}
+  def crossover!
+    (size * crossover_rate).to_i.times do
+      new_chromosomes = random_chromosome.crossover(random_chromosome)
+      add_chromosomes(new_chromosomes)
     end
+  end
 
-    def to_s
-      @chromosomes.each.inject {|str, val| str.to_s + "||" +  val.to_s}
+  def selection!
+    @chromosomes.sort! do |a, b|
+      b.fitness <=> a.fitness
     end
+    @chromosomes.slice!(max_size .. size) \
+      if size > max_size
+  end
 
-    def size
-      @chromosomes.size
-    end
+  def best_fitness
+    @chromosomes.max do |a, b|
+      a.fitness <=> b.fitness
+    end.fitness
+  end
+
+  def avg_fitness
+    @chromosomes.inject(0) {|sum, chromo| sum + chromo.fitness} / size
+  end
+
+  def to_s
+    @chromosomes.each.inject {|str, val| str.to_s + "||" +  val.to_s}
+  end
+
+  def size
+    @chromosomes.size
+  end
+
+  def random_chromosome
+    @chromosomes[rand(size)]
+  end
+
+  def mutation_rate
+    @algorithm_params[:mutation_rate]
+  end
+
+  def crossover_rate
+    @algorithm_params[:crossover_rate]
+  end
+
+  def max_size
+    @algorithm_params[:max_size]
   end
 end

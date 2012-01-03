@@ -1,26 +1,60 @@
-module GenAlg
-  class Algorithm
-    def initialize(params)
-      @population = GenAlg::Population.new(:chromosomes => params[:chromosomes])
-      @mutation_options = params[:mutation]
-      @crossover_options = params[:crossover]
-      @selection_options = params[:selection]
-      @max_iterations = params[:max_iterate]
+class GenAlg::Algorithm
+  DEFAULT_MAX_GENERATION = 10
+  CROSSOVER_OPTIONS = %w(crossover_percentage crossover_method)
+  MUTATION_OPTIONS = %w(mutation_percentage mutation_method)
 
-    end
+  class NoInitialPopulation < StandardError; end
+  attr_accessor :population
 
-    def iterate
-      @max_iterations.times do
-        p "Starting genetic process ..."
-        p "Crossover ..."
-        @population.crossover!(@crossover_options) #add mutation method here
-        p "Mutation ..."
-        @population.mutation!(@mutation_options)
-        p "Selection ..."
-        @population.selection!(@selection_options)	
-        @population.age = @population.age + 1
-        yield @population
-      end
+  def initialize(params)
+    @params = params
+  end
+
+  def init_population(population)
+    @population = GenAlg::Population.new(
+      :chromosomes => population,
+      :algorithm_params => @params
+    )
+  end
+
+  def evolve
+    raise NoInitialPopulation unless population
+    until termination_condition_reached? do
+      Logger.info "Starting genetic algorithm ..."
+      Logger.info "Crossover ..."
+      population.crossover!
+      Logger.info "Mutation ..."
+      population.mutation!
+      Logger.info "Selection ..."
+      population.selection!
+      population.age += 1
+      yield population
     end
+  end
+
+  def termination_condition_reached?
+    case termination_condition
+    when 'fitness'
+      #TODO
+      true
+    when 'saturation'
+      #TODO
+      true
+    when 'max_generation'
+      max_generation_reached?
+    else
+      Logger.warn "Incorrect termination condition: #{termination_condition}.
+                   We will use default condition: max_generation"
+      max_generation_reached?
+    end
+  end
+
+  def termination_condition
+    @params[:termination_condition] || 'max_generation'
+  end
+
+  def max_generation_reached?
+    max_generation = @params[:max_generation] || DEFAULT_MAX_GENERATION
+    population.age >= max_generation
   end
 end
