@@ -36,10 +36,14 @@ class GenAlg::Population
       if size > max_size
   end
 
-  def best_fitness
+  def best_chromo
     @chromosomes.max do |a, b|
       a.fitness <=> b.fitness
-    end.fitness
+    end
+  end
+
+  def best_fitness
+    best_chromo.fitness
   end
 
   def avg_fitness

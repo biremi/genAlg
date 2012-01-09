@@ -1,0 +1,7 @@
+.*.swo
+.*.swp
+.rvmrc
+.swp
+log/*.log
+log
+*.swp

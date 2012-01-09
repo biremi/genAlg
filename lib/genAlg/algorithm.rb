@@ -19,8 +19,8 @@ class GenAlg::Algorithm
 
   def evolve
     raise NoInitialPopulation unless population
+    Logger.info "Starting genetic algorithm ..."
     until termination_condition_reached? do
-      Logger.info "Starting genetic algorithm ..."
       Logger.info "Crossover ..."
       population.crossover!
       Logger.info "Mutation ..."

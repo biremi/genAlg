@@ -1,15 +1,17 @@
 class GenAlg::Chromosome
   OBLIGATORY_METHODS = %w(fitness mutation crossover)
 
+  class <<self
+    def copy(chromo)
+      copied_chromo = Marshal::load(Marshal.dump(chromo))
+    end
+  end
+
   class ObligatoryMethodNotDefined < StandardError; end
   attr_accessor :alleles
 
-  def initialize(alleles=[])
-    @alleles = alleles
-  end
-
-  def to_s
-    alleles.join("-")
+  def initialize(data=[])
+    @alleles = data
   end
 
   def push(allel)
