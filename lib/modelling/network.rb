@@ -1,28 +1,45 @@
 module Modelling
   class Network
-    class FileNotFound < StandardError; end
-
     class << self
-      def generate(number_of_nodes, density)
-        network = Network.new()
-        network.size = number_of_nodes
-        network.density = density
-        network.generate_adjacency_matrix
-        network.generate_edge_weight_matrix
-        network.generate_capacity_matrix
+      def generate(number, density)
+        network = Graph.new()
+        generate_vertices(network, number)
+        generate_edges(network, density)
         network
       end
 
       def read(file_path)
         raise FileNotFound unless File.exists?(file_path)
-        network = Network.new()
         network = File.open(file_path) do|file|
           Marshal.load(file)
         end
       end
+
+      private
+      def generate_vertices(graph, number)
+        number.times do |i|
+          vertex = {:id => "#{i}"}
+          graph.add_vertex(i, vertex)
+        end
+      end
+
+      def generate_edges(graph, density)
+        graph.vertices.each do |source_id, source_vertex|
+          graph.vertices.each do |destination_id, destination_vertex|
+            if rand(100) < density
+              graph.add_edge(source_id, destination_id, generate_edge)
+            end
+          end
+        end
+      end
+
+      def generate_edge
+        {
+          :weight => rand(100)
+        }
+      end
     end
 
-    attr_accessor :size, :density
     def save!(file_path)
       File.open(file_path,'w') do|file|
         Marshal.dump(self, file)
